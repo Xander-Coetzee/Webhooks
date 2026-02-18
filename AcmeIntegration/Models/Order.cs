@@ -2,7 +2,7 @@ namespace AcmeIntegration.Models
 {
     public class Order
     {
-        public int Id { get; set; } 
+        public int Id { get; set; }
         public string SourceSystem { get; set; }
         public string ExternalOrderId { get; set; }
         public string OrderNumber { get; set; }
@@ -10,7 +10,7 @@ namespace AcmeIntegration.Models
         public string Currency { get; set; }
         public string Status { get; set; }
         public decimal OrderTotal { get; set; }
-        
+
         // This links the order to its specific items
         public List<OrderLine> Lines { get; set; } = new List<OrderLine>();
     }

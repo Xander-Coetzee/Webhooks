@@ -19,10 +19,10 @@ namespace AcmeIntegration.Controllers
         public async Task<IActionResult> ReceiveOrder([FromBody] WebhookEvent payload)
         {
             payload.Status = "Pending";
-            
+
             _dbContext.WebhookEvents.Add(payload);
             await _dbContext.SaveChangesAsync();
-            
+
             return Accepted();
         }
     }

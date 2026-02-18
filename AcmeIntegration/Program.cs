@@ -1,16 +1,18 @@
 using AcmeIntegration.Data;
 using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-
 // This registers our database context using Dependency Injection
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
-    
 builder.Services.AddControllers();
+builder.Services.AddHttpClient<AcmeApiService>();
+builder.Services.AddHostedService<WebhookProcessorWorker>()
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

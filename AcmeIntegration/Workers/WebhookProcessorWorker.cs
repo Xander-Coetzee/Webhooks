@@ -1,35 +1,43 @@
-foreach (var webhook in pendingWebhooks)
+using AcmeIntegration.Models;
+using AcmeIntegration.Services;
+using Microsoft.EntityFrameworkCore;
+
+namespace AcmeIntegration.Workers
 {
-    // 1. Fetch details from Acme API
-    var acmeOrder = await _acmeService.GetOrderDetailsAsync(webhook.ExternalOrderId);
-
-    // 2. Map to our database Order model
-    var newOrder = new Order
+    public class WebhookProcessorWorker : BackgroundService
     {
-        SourceSystem = "Acme", // Here is our label!
-        ExternalOrderId = acmeOrder.ExternalOrderId,
-        OrderNumber = acmeOrder.OrderNumber,
-        OrderTotal = acmeOrder.OrderTotal,
-        OrderDate = DateTimeOffset.UtcNow,
-        Status = "New",
-    };
+        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly AcmeApiService _acmeService;
 
-    // 3. Map the items (Lines)
-    foreach (var line in acmeOrder.Lines)
-    {
-        newOrder.Lines.Add(
-            new OrderLine
+        public WebhookProcessorWorker(IServiceScopeFactory scopeFactory, AcmeApiService acmeService)
+        {
+            _scopeFactory = scopeFactory;
+            _acmeService = acmeService;
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
             {
-                Sku = line.Sku,
-                Qty = line.Qty,
-                UnitPrice = line.UnitPrice,
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                    // 1. Get the pending webhooks
+                    var pendingWebhooks = await context
+                        .WebhookEvents.Where(w => w.Status == "Pending")
+                        .ToListAsync(stoppingToken);
+
+                    // 2. Process each one
+                    foreach (var webhook in pendingWebhooks)
+                    {
+                        // Logic for calling API and saving Order goes here
+                    }
+                }
+
+                // Wait 30 seconds before checking again
+                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
-        );
+        }
     }
-
-    // 4. Save to DB and update Webhook status
-    context.Orders.Add(newOrder);
-    webhook.Status = "Processed";
-
-    await context.SaveChangesAsync();
 }
