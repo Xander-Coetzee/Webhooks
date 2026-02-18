@@ -15,9 +15,9 @@ namespace AcmeIntegration.Models
         public string ExternalOrderId { get; set; }
         
         public DateTimeOffset OccurredAt { get; set; }
-        public string Payload { get; set; }
-        public string Status { get; set; }
+        public string? Payload { get; set; }
+        public string? Status { get; set; }
         public int Attempts { get; set; }
-        public string LastError { get; set; }
+        public string? LastError { get; set; }
     }
 }
