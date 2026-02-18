@@ -9,6 +9,7 @@ namespace AcmeIntegration.Models
         public DateTimeOffset? EndTime { get; set; }
         public int RecordsProcessed { get; set; }
         public int RecordsFailed { get; set; }
+        public int RecordsSkipped { get; set; }
         public string Status { get; set; } // "Running", "Completed", "Failed"
 
         // We can link errors to this run if we want detailed error tracking

@@ -18,25 +18,10 @@ namespace AcmeIntegration.Services
             // return await _http.GetFromJsonAsync<AcmeOrderResponse>($"https://api.acme.com/orders/{orderId}");
 
             // For our simulation, let's just return a fake "Successful" response:
-            return new AcmeOrderResponse
-            {
-                ExternalOrderId = orderId,
-                OrderNumber = "SO-" + orderId.Split('_')[1],
-                OrderTotal = 150.00m,
-                Currency = "USD",
-                OrderDate = DateTimeOffset.UtcNow.AddMinutes(-10),
-                Status = "SHIPPED",
-                Customer = new AcmeCustomerResponse { Email = "john.doe@example.com" },
-                Lines = new List<AcmeOrderLineResponse>
-                {
-                    new AcmeOrderLineResponse
-                    {
-                        Sku = "PROD-001",
-                        Qty = 1,
-                        UnitPrice = 150.00m,
-                    },
-                },
-            };
+            var response = await _http.GetAsync($"/external-api/orders/{orderId}");
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<AcmeOrderResponse>();
         }
     }
 }

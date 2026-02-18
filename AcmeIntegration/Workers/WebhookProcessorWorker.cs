@@ -53,6 +53,7 @@ namespace AcmeIntegration.Workers
                                 Status = "Running",
                                 RecordsProcessed = 0,
                                 RecordsFailed = 0,
+                                RecordsSkipped = 0,
                             };
                             context.ProcessingRuns.Add(run);
                             await context.SaveChangesAsync(stoppingToken);
@@ -94,6 +95,8 @@ namespace AcmeIntegration.Workers
                                         )
                                         .FirstOrDefaultAsync(stoppingToken);
 
+                                    bool wasSkipped = false;
+
                                     // C. Upsert Logic (Update or Insert)
                                     if (existingOrder == null)
                                     {
@@ -121,26 +124,39 @@ namespace AcmeIntegration.Workers
                                     }
                                     else
                                     {
-                                        // UPDATE
-                                        existingOrder.OrderTotal = acmeOrder.OrderTotal;
-                                        existingOrder.Currency = acmeOrder.Currency;
-                                        existingOrder.OrderNumber = acmeOrder.OrderNumber;
-                                        existingOrder.OrderDate = acmeOrder.OrderDate;
-                                        existingOrder.Status = acmeOrder.Status;
-                                        existingOrder.CustomerEmail = acmeOrder.Customer?.Email;
+                                        // CHECK FOR CHANGES (Idempotency Optimization)
+                                        // If identical -> skip
+                                        if (IsOrderIdentical(existingOrder, acmeOrder))
+                                        {
+                                            wasSkipped = true;
+                                            _logger.LogInformation(
+                                                "Order {ExternalOrderId} is identical. Skipping update.",
+                                                acmeOrder.ExternalOrderId
+                                            );
+                                        }
+                                        else
+                                        {
+                                            // UPDATE
+                                            existingOrder.OrderTotal = acmeOrder.OrderTotal;
+                                            existingOrder.Currency = acmeOrder.Currency;
+                                            existingOrder.OrderNumber = acmeOrder.OrderNumber;
+                                            existingOrder.OrderDate = acmeOrder.OrderDate;
+                                            existingOrder.Status = acmeOrder.Status;
+                                            existingOrder.CustomerEmail = acmeOrder.Customer?.Email;
 
-                                        context.OrderLines.RemoveRange(existingOrder.Lines);
-                                        existingOrder.Lines = acmeOrder
-                                            .Lines.Select(l => new OrderLine
-                                            {
-                                                Sku = l.Sku,
-                                                Qty = l.Qty,
-                                                UnitPrice = l.UnitPrice,
-                                            })
-                                            .ToList();
+                                            context.OrderLines.RemoveRange(existingOrder.Lines);
+                                            existingOrder.Lines = acmeOrder
+                                                .Lines.Select(l => new OrderLine
+                                                {
+                                                    Sku = l.Sku,
+                                                    Qty = l.Qty,
+                                                    UnitPrice = l.UnitPrice,
+                                                })
+                                                .ToList();
+                                        }
                                     }
 
-                                    // D. Mark successful
+                                    // D. Mark successful (even if skipped, the webhook event itself is "processed")
                                     webhook.Status = "Processed";
                                     await context.SaveChangesAsync(stoppingToken);
 
@@ -151,15 +167,22 @@ namespace AcmeIntegration.Workers
                                     );
                                     if (currentRun != null)
                                     {
-                                        currentRun.RecordsProcessed++;
+                                        if (wasSkipped)
+                                            currentRun.RecordsSkipped++;
+                                        else
+                                            currentRun.RecordsProcessed++;
+
                                         await context.SaveChangesAsync(stoppingToken);
                                     }
 
-                                    _logger.LogInformation(
-                                        "Successfully processed webhook {WebhookId} for Order {ExternalOrderId}",
-                                        webhookId,
-                                        webhook.ExternalOrderId
-                                    );
+                                    if (!wasSkipped)
+                                    {
+                                        _logger.LogInformation(
+                                            "Successfully processed webhook {WebhookId} for Order {ExternalOrderId}",
+                                            webhookId,
+                                            webhook.ExternalOrderId
+                                        );
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
@@ -223,6 +246,45 @@ namespace AcmeIntegration.Workers
                 // Wait 30 seconds before checking again
                 await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
+        }
+
+        private bool IsOrderIdentical(Order existing, AcmeOrderResponse incoming)
+        {
+            // 1. Check Header Fields
+            if (existing.OrderTotal != incoming.OrderTotal)
+                return false;
+            if (existing.Currency != incoming.Currency)
+                return false;
+            // Note: We might normally ignore OrderNumber changes if ExternalID matches, but let's check it.
+            if (existing.OrderNumber != incoming.OrderNumber)
+                return false;
+            if (existing.Status != incoming.Status)
+                return false;
+            if (existing.CustomerEmail != incoming.Customer?.Email)
+                return false;
+            // Date comparison can be tricky with offsets, but let's try exact match
+            if (existing.OrderDate != incoming.OrderDate)
+                return false;
+
+            // 2. Check Lines
+            if (existing.Lines.Count != incoming.Lines.Count)
+                return false;
+
+            // Simple check: Sort both by SKU and compare
+            var existingLines = existing.Lines.OrderBy(l => l.Sku).ToList();
+            var incomingLines = incoming.Lines.OrderBy(l => l.Sku).ToList();
+
+            for (int i = 0; i < existingLines.Count; i++)
+            {
+                if (existingLines[i].Sku != incomingLines[i].Sku)
+                    return false;
+                if (existingLines[i].Qty != incomingLines[i].Qty)
+                    return false;
+                if (existingLines[i].UnitPrice != incomingLines[i].UnitPrice)
+                    return false;
+            }
+
+            return true;
         }
 
         private void ValidateOrder(AcmeOrderResponse order)

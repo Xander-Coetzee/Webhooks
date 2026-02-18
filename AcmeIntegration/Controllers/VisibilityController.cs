@@ -22,7 +22,7 @@ namespace AcmeIntegration.Controllers
         public async Task<IActionResult> GetImportRuns()
         {
             var runs = await _dbContext
-                .ProcessingRuns.OrderByDescending(r => r.StartTime)
+                .ProcessingRuns.OrderByDescending(r => r.Id)
                 .Take(20)
                 .ToListAsync();
 
@@ -35,7 +35,7 @@ namespace AcmeIntegration.Controllers
         public async Task<IActionResult> GetImportRunDetails(int id)
         {
             var run = await _dbContext
-                .ProcessingRuns.Include(r => r.Errors.OrderBy(e => e.OccurredAt).Take(20))
+                .ProcessingRuns.Include(r => r.Errors.OrderBy(e => e.Id).Take(20))
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (run == null)

@@ -13,7 +13,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 
 builder.Services.AddControllers();
-builder.Services.AddHttpClient<AcmeApiService>();
+builder.Services.AddHttpClient<AcmeApiService>(client =>
+{
+    // Hardcoded to localhost for this sample. In prod, use appsettings.json.
+    client.BaseAddress = new Uri("http://localhost:5287");
+});
 builder.Services.AddHostedService<WebhookProcessorWorker>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
