@@ -10,6 +10,7 @@ namespace AcmeIntegration.Models
         public string Currency { get; set; }
         public string Status { get; set; }
         public decimal OrderTotal { get; set; }
+        public string CustomerEmail { get; set; }
 
         // This links the order to its specific items
         public List<OrderLine> Lines { get; set; } = new List<OrderLine>();

@@ -7,9 +7,17 @@ namespace AcmeIntegration.Models
         public string OrderNumber { get; set; }
         public decimal OrderTotal { get; set; }
         public string Currency { get; set; }
+        public DateTimeOffset OrderDate { get; set; }
+        public string Status { get; set; }
+        public AcmeCustomerResponse Customer { get; set; }
 
         // This holds the list of items inside the order
         public List<AcmeOrderLineResponse> Lines { get; set; } = new List<AcmeOrderLineResponse>();
+    }
+
+    public class AcmeCustomerResponse
+    {
+        public string Email { get; set; }
     }
 
     // This represents each individual item in the 'lines' array from the API

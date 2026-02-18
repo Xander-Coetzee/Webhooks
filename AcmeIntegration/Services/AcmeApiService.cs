@@ -24,6 +24,9 @@ namespace AcmeIntegration.Services
                 OrderNumber = "SO-" + orderId.Split('_')[1],
                 OrderTotal = 150.00m,
                 Currency = "USD",
+                OrderDate = DateTimeOffset.UtcNow.AddMinutes(-10),
+                Status = "SHIPPED",
+                Customer = new AcmeCustomerResponse { Email = "john.doe@example.com" },
                 Lines = new List<AcmeOrderLineResponse>
                 {
                     new AcmeOrderLineResponse

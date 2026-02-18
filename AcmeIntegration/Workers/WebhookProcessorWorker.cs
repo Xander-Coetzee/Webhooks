@@ -105,8 +105,9 @@ namespace AcmeIntegration.Workers
                                             OrderNumber = acmeOrder.OrderNumber,
                                             OrderTotal = acmeOrder.OrderTotal,
                                             Currency = acmeOrder.Currency,
-                                            OrderDate = DateTimeOffset.UtcNow,
-                                            Status = "New",
+                                            OrderDate = acmeOrder.OrderDate,
+                                            Status = acmeOrder.Status,
+                                            CustomerEmail = acmeOrder.Customer?.Email,
                                             Lines = acmeOrder
                                                 .Lines.Select(l => new OrderLine
                                                 {
@@ -124,6 +125,9 @@ namespace AcmeIntegration.Workers
                                         existingOrder.OrderTotal = acmeOrder.OrderTotal;
                                         existingOrder.Currency = acmeOrder.Currency;
                                         existingOrder.OrderNumber = acmeOrder.OrderNumber;
+                                        existingOrder.OrderDate = acmeOrder.OrderDate;
+                                        existingOrder.Status = acmeOrder.Status;
+                                        existingOrder.CustomerEmail = acmeOrder.Customer?.Email;
 
                                         context.OrderLines.RemoveRange(existingOrder.Lines);
                                         existingOrder.Lines = acmeOrder
