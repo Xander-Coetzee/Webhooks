@@ -9,5 +9,7 @@ namespace AcmeIntegration.Data
 
         // This tells the database to create a table called WebhookEvents based on our class
         public DbSet<WebhookEvent> WebhookEvents { get; set; }
+        public DbSet<Order> Orders{ get; set; }
+        public DbSet<OrderLine> OrderLines { get; set; }
     }
 }
