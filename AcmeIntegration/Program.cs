@@ -1,4 +1,6 @@
 using AcmeIntegration.Data;
+using AcmeIntegration.Services;
+using AcmeIntegration.Workers;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +14,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient<AcmeApiService>();
-builder.Services.AddHostedService<WebhookProcessorWorker>()
+builder.Services.AddHostedService<WebhookProcessorWorker>();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

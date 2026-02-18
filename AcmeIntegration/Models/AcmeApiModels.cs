@@ -6,6 +6,7 @@ namespace AcmeIntegration.Models
         public string ExternalOrderId { get; set; }
         public string OrderNumber { get; set; }
         public decimal OrderTotal { get; set; }
+        public string Currency { get; set; }
 
         // This holds the list of items inside the order
         public List<AcmeOrderLineResponse> Lines { get; set; } = new List<AcmeOrderLineResponse>();

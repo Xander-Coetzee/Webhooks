@@ -23,6 +23,7 @@ namespace AcmeIntegration.Services
                 ExternalOrderId = orderId,
                 OrderNumber = "SO-" + orderId.Split('_')[1],
                 OrderTotal = 150.00m,
+                Currency = "USD",
                 Lines = new List<AcmeOrderLineResponse>
                 {
                     new AcmeOrderLineResponse
