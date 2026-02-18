@@ -12,5 +12,8 @@ namespace AcmeIntegration.Data
         public DbSet<WebhookEvent> WebhookEvents { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderLine> OrderLines { get; set; }
+
+        public DbSet<ProcessingRun> ProcessingRuns { get; set; }
+        public DbSet<ProcessingError> ProcessingErrors { get; set; }
     }
 }

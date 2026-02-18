@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AcmeIntegration")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b53715675772356e589af36949384a477cbdf1ae")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4b6ad8cb915635b34aa2802e771ff8a972f20f73")]
 [assembly: System.Reflection.AssemblyProductAttribute("AcmeIntegration")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AcmeIntegration")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
