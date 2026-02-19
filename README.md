@@ -2,8 +2,6 @@
 
 This project implements a webhook ingestion service for the fictional Acme Commerce platform. It receives `order.created` webhooks, fetches full order details from an external API, and stores them in a local SQLite database using an idempotent upsert strategy.
 
-## 🚀 Getting Started
-
 ### Prerequisites
 
 - .NET 10.0 SDK or later
@@ -35,8 +33,6 @@ This project implements a webhook ingestion service for the fictional Acme Comme
     dotnet run
     ```
     The API will start at `http://localhost:5287` (or similar, check console output).
-
-## 🧪 Simulation / Testing
 
 ### 1. Send a Webhook (PowerShell)
 
@@ -91,14 +87,6 @@ Invoke-RestMethod -Uri "http://localhost:5287/api/import-runs" -Method Get
 ### Assumptions & Tradeoffs
 
 1.  **Database**: Used SQLite for simplicity and portability (zero configuration).
-2.  **Worker Interval**: Hardcoded to 30s. In production, this would be configurable or event-driven (e.g., via a message queue like RabbitMQ/Azure Service Bus).
+2.  **Worker Interval**: Hardcoded to 30s. In production, this would be configurable or event-driven.
 3.  **Mock API**: The `AcmeApiService` mocks the external call and returns static/randomized data for demonstration purposes.
 4.  **Error Handling**: Failed webhooks are marked as `Failed` and not retried automatically. A production system would implement exponential backoff retry logic.
-
-### Future Improvements
-
-1.  **Resiliency**: Implement proper retry policies (Polly) for the external API calls.
-2.  **Queueing**: Replace the database-polling worker with a true message queue (e.g., Azure Service Bus) for better scalability and immediate processing.
-3.  **Security**: Add API Key authentication for the webhook endpoint to ensure calls typically come from Acme.
-4.  **Testing**: Add unit tests for the Worker logic and integration tests for the full flow.
-5.  **Configuration**: Move magic strings and intervals to `appsettings.json`.
