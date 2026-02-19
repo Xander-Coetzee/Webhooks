@@ -43,7 +43,7 @@ Invoke-RestMethod -Uri "http://localhost:5287/webhooks/orders" -Method Post -Bod
     eventId = "evt_test_001"
     eventType = "order.created"
     sourceSystem = "Acme"
-    externalOrderId = "ord_TEST-001"
+    externalOrderId = "ORD-TEST-001"
     occurredAt = "2026-02-18T10:00:00Z"
 } | ConvertTo-Json) -ContentType "application/json"
 ```
@@ -90,3 +90,11 @@ Invoke-RestMethod -Uri "http://localhost:5287/api/import-runs" -Method Get
 2.  **Worker Interval**: Hardcoded to 30s. In production, this would be configurable or event-driven.
 3.  **Mock API**: The `AcmeApiService` mocks the external call and returns static/randomized data for demonstration purposes.
 4.  **Error Handling**: Failed webhooks are marked as `Failed` and not retried automatically. A production system would implement exponential backoff retry logic.
+
+### Future Improvements
+
+1.  **Resiliency**: Implement proper retry policies (Polly) for the external API calls.
+2.  **Queueing**: Replace the database-polling worker with a true message queue (e.g., Azure Service Bus) for better scalability and immediate processing.
+3.  **Security**: Add API Key authentication for the webhook endpoint to ensure calls typically come from Acme.
+4.  **Testing**: Add unit tests for the Worker logic and integration tests for the full flow.
+5.  **Configuration**: Move magic strings and intervals to `appsettings.json`.
