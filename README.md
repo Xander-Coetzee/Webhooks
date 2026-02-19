@@ -43,7 +43,7 @@ Invoke-RestMethod -Uri "http://localhost:5287/webhooks/orders" -Method Post -Bod
     eventId = "evt_test_001"
     eventType = "order.created"
     sourceSystem = "Acme"
-    externalOrderId = "ORD-TEST-001"
+    externalOrderId = "ord_TEST-001"
     occurredAt = "2026-02-18T10:00:00Z"
 } | ConvertTo-Json) -ContentType "application/json"
 ```
